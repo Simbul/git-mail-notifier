@@ -1,4 +1,7 @@
+# Comma-separated list of recipient email addresses
 recipients: "someaddress@someexampledomain.com"
+
+# Sender email address (optional)
 from: "no-reply@someexampledomain.com"
 
 # Placeholders REPO_NAME and BRANCH_NAME will be substituted with the names of

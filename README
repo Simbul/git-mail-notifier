@@ -10,4 +10,4 @@ Call the script from the post-receive file in the "hooks" directory of the remot
     #!/bin/sh
     /path/to/csv_notifier.rb /path/to/csv_config.yml
 
-The script has a single required parameter, which is a YML configuration file. See csv_config.yml.sample for an example.
+The script has a single required parameter, which is a YAML configuration file. See csv_config.yml.sample for an example.

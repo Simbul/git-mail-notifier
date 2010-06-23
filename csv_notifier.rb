@@ -4,6 +4,7 @@ require 'rubygems'
 require 'action_mailer'
 
 class CsvNotifier
+  # Return the name of the current Git repository.
   def repo_name
     git_prefix = `git config hooks.emailprefix`.strip
     return git_prefix unless git_prefix.empty?
@@ -11,10 +12,13 @@ class CsvNotifier
     return "#{dir_name}"
   end
   
+  # Return the provided string with placeholders substituted with actual values.
   def expand_placeholders(text)
     text.gsub("REPO_NAME", repo_name).gsub("BRANCH_NAME", @branch_name)
   end
   
+  # Run the script.
+  # The script has a single required parameter: a YAML configuration file.
   def main(args)
     if args.empty?
       puts "Configuration file is missing. You need to pass it as an argument."
@@ -79,6 +83,7 @@ class CsvNotifier
 end
 
 class Mailer < ActionMailer::Base
+  # Send a mail with an attached zip file.
   def zip_message(to_field, from_field, subject_field, attachment_body, message_body, filename)
     recipients to_field
     from       from_field
