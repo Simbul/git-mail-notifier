@@ -24,12 +24,12 @@ class CsvNotifier
     end
     
     @config = YAML::load_file(config_path)
-    @mailer = Mailer.new(@config["recipients"], (@config["from"] || "no-reply@nodomain.com"))
+    @to = @config["recipients"]
+    @from = @config["from"] || "no-reply@nodomain.com"
     
     begin
       STDIN.each_line do |line|
         oldrev, newrev, ref = line.strip.split
-        puts oldrev, newrev, ref
         
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
           branch = ref.sub('refs/heads/', '')
@@ -59,7 +59,14 @@ class CsvNotifier
           end
           unless csvs.empty?
             archive = `git archive --format=zip #{newrev} #{csvs.join(" ")}`
-            @mailer.deliver_zip_message(archive, mail_body, "csv_#{repo_name}_#{branch}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip")
+            Mailer.deliver_zip_message(
+              @to,
+              @from,
+              "New CSV for #{repo_name}",
+              archive,
+              mail_body,
+              "csv_#{repo_name}_#{branch}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip"
+            )
             puts "Sent CSV notification email"
           end
         end
@@ -73,15 +80,10 @@ class CsvNotifier
 end
 
 class Mailer < ActionMailer::Base
-  def initialize(recipients, from)
-    @recipients = recipients
-    @from = from
-  end
-  
-  def zip_message(attachment_body, message_body, filename)
-    recipients @recipients
-    from       @from
-    subject    "New CSV for #{repo_name}"
+  def zip_message(to_field, from_field, subject_field, attachment_body, message_body, filename)
+    recipients to_field
+    from       from_field
+    subject    subject_field
     body       message_body
 
     attachment :content_type => "application/zip",
