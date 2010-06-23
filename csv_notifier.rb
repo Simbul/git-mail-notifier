@@ -27,10 +27,10 @@ class CsvNotifier
     @to = @config["recipients"]
     @from = @config["from"] || "no-reply@nodomain.com"
     
-    begin
-      STDIN.each_line do |line|
-        oldrev, newrev, ref = line.strip.split
-        
+    STDIN.each_line do |line|
+      oldrev, newrev, ref = line.strip.split
+      
+      begin
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
           branch = ref.sub('refs/heads/', '')
           mail_body = "
@@ -70,10 +70,10 @@ class CsvNotifier
             puts "Sent CSV notification email"
           end
         end
+      rescue Exception => e
+        puts "Exception in CSV notifier hook: #{e}"
+        puts "Hook params: #{oldrev} #{newrev} #{ref}"
       end
-    rescue Exception => e
-      puts "Exception in CSV mailer hook: #{e}"
-      puts "Hook params: #{oldrev} #{newrev} #{ref}"
     end
   end
   
