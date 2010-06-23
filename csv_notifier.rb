@@ -11,6 +11,10 @@ class CsvNotifier
     return "#{dir_name}"
   end
   
+  def expand_placeholders(text)
+    text.gsub("REPO_NAME", repo_name).gsub("BRANCH_NAME", @branch_name)
+  end
+  
   def main(args)
     if args.empty?
       puts "Configuration file is missing. You need to pass it as an argument."
@@ -26,27 +30,22 @@ class CsvNotifier
     @config = YAML::load_file(config_path)
     @to = @config["recipients"]
     @from = @config["from"] || "no-reply@nodomain.com"
+    @branch_name = ""
     
     STDIN.each_line do |line|
       oldrev, newrev, ref = line.strip.split
       
       begin
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
-          branch = ref.sub('refs/heads/', '')
-          mail_body = "
-            One or more CSV files have been updated in the #{repo_name} repository (#{branch} branch).
-            They are attached to this mail as a compressed ZIP archive.
-
-            "
+          @branch_name = ref.sub('refs/heads/', '')
+          mail_body = expand_placeholders(@config["body"])
+          mail_subject = expand_placeholders(@config["subject"])
 
           if oldrev == "0000000000000000000000000000000000000000"
             # No old revision specified: it has to be a new branch
             oldrev = `git rev-list --reverse #{newrev} | head -1`.strip
-            mail_body = "
-              A new branch named #{branch} has been created on repository #{repo_name}.
-              The CSV files contained in the branch are attached to this mail as a compressed ZIP archive.
-
-              "
+            mail_body = expand_placeholders(@config["body_new_branch"])
+            mail_subject = expand_placeholders(@config["subject_new_branch"])
           end
 
           files = `git diff --diff-filter=ACM --name-only #{oldrev} #{newrev}`.strip
@@ -62,10 +61,10 @@ class CsvNotifier
             Mailer.deliver_zip_message(
               @to,
               @from,
-              "New CSV for #{repo_name}",
+              mail_subject,
               archive,
               mail_body,
-              "csv_#{repo_name}_#{branch}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip"
+              "csv_#{repo_name}_#{@branch_name}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip"
             )
             puts "Sent CSV notification email"
           end

@@ -1,2 +1,27 @@
 recipients: "someaddress@someexampledomain.com"
 from: "no-reply@someexampledomain.com"
+
+# Placeholders REPO_NAME and BRANCH_NAME will be substituted with the names of
+# the repository and the branch respectively.
+
+# This will be sent as the mail body in a standard push.
+subject: "New CSV for REPO_NAME"
+
+# This will be sent as the mail body in a push creating a new branch.
+subject_new_branch: "New CSV for REPO_NAME"
+
+# This will be sent as the mail body in a standard push.
+body: |
+  One or more CSV files have been updated in the REPO_NAME repository (BRANCH_NAME branch).
+  They are attached to this mail as a compressed ZIP archive.
+  
+  ---
+# end of body
+
+# This will be sent as the mail body in a push creating a new branch.
+body_new_branch: |
+  A new branch named BRANCH_NAME has been created on repository REPO_NAME.
+  The CSV files contained in the branch are attached to this mail as a compressed ZIP archive.
+  
+  ---
+# end of body_new_branch
