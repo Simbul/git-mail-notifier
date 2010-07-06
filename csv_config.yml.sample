@@ -6,6 +6,8 @@ from: "no-reply@someexampledomain.com"
 
 # Placeholders REPO_NAME and BRANCH_NAME will be substituted with the names of
 # the repository and the branch respectively.
+# FILE_NAMES will be substituted with the list of files included in the
+# archive, each one on a single line.
 
 # This will be sent as the mail body in a standard push.
 subject: "New CSV for REPO_NAME"
@@ -18,6 +20,8 @@ body: |
   One or more CSV files have been updated in the REPO_NAME repository (BRANCH_NAME branch).
   They are attached to this mail as a compressed ZIP archive.
   
+  FILE_NAMES
+  
   ---
 # end of body
 
@@ -25,6 +29,8 @@ body: |
 body_new_branch: |
   A new branch named BRANCH_NAME has been created on repository REPO_NAME.
   The CSV files contained in the branch are attached to this mail as a compressed ZIP archive.
+  
+  FILE_NAMES
   
   ---
 # end of body_new_branch

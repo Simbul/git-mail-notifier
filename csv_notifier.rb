@@ -14,7 +14,7 @@ class CsvNotifier
   
   # Return the provided string with placeholders substituted with actual values.
   def expand_placeholders(text)
-    text.gsub("REPO_NAME", repo_name).gsub("BRANCH_NAME", @branch_name)
+    text.gsub("REPO_NAME", repo_name).gsub("BRANCH_NAME", @branch_name).gsub("FILE_NAMES", @file_names)
   end
   
   # Run the script.
@@ -42,14 +42,14 @@ class CsvNotifier
       begin
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
           @branch_name = ref.sub('refs/heads/', '')
-          mail_body = expand_placeholders(@config["body"])
-          mail_subject = expand_placeholders(@config["subject"])
+          tmp_body = @config["body"]
+          tmp_subject = @config["subject"]
 
           if oldrev == "0000000000000000000000000000000000000000"
             # No old revision specified: it has to be a new branch
             oldrev = `git rev-list --reverse #{newrev} | head -1`.strip
-            mail_body = expand_placeholders(@config["body_new_branch"])
-            mail_subject = expand_placeholders(@config["subject_new_branch"])
+            tmp_body = @config["body_new_branch"]
+            tmp_subject = @config["subject_new_branch"]
           end
 
           files = `git diff --diff-filter=ACM --name-only #{oldrev} #{newrev}`.strip
@@ -60,14 +60,17 @@ class CsvNotifier
               csvs << filename.strip
             end
           end
+          
+          @file_names = csvs.join("\n")
+          
           unless csvs.empty?
             archive = `git archive --format=zip #{newrev} #{csvs.join(" ")}`
             Mailer.deliver_zip_message(
               @to,
               @from,
-              mail_subject,
+              expand_placeholders(tmp_subject),
               archive,
-              mail_body,
+              expand_placeholders(tmp_body),
               "csv_#{repo_name}_#{@branch_name}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip"
             )
             puts "Sent CSV notification email"
