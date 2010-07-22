@@ -1,0 +1,2 @@
+To start Postfix on MacOSX:
+$ sudo postfix start
