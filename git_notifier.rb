@@ -14,7 +14,11 @@ class GitNotifier
   
   # Return the provided string with placeholders substituted with actual values.
   def expand_placeholders(text)
-    text.gsub("REPO_NAME", repo_name).gsub("BRANCH_NAME", @branch_name).gsub("FILE_NAMES", @file_names)
+    text \
+      .gsub("REPO_NAME", repo_name) \
+      .gsub("BRANCH_NAME", @branch_name) \
+      .gsub("FILE_NAMES", @file_names) \
+      .gsub("FILE_DIFFS", @file_diffs)
   end
   
   # Run the script.
@@ -34,7 +38,7 @@ class GitNotifier
     @config = YAML::load_file(config_path)
     @to = @config["recipients"]
     @from = @config["from"] || "no-reply@nodomain.com"
-    @branch_name = ""
+    
     if @config["exclude_branches"]
       @exclude_branches = @config["exclude_branches"].split
     else
@@ -53,6 +57,8 @@ class GitNotifier
     
     STDIN.each_line do |line|
       oldrev, newrev, ref = line.strip.split
+      @branch_name = ""
+      @file_diffs = ""
       
       begin
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
@@ -71,18 +77,23 @@ class GitNotifier
             tmp_subject = @config["subject_new_branch"]
           end
 
-          files = `git diff --diff-filter=ACM --name-only #{oldrev} #{newrev}`.strip
+          files = `git diff --diff-filter=ACMDR --name-status #{oldrev} #{newrev}`.strip
 
           matching_files = []
-          files.each do |filename|
-            if filename =~ @include_matches
-              matching_files << filename.strip
+          matching_lines = []
+          files.each do |file_line|
+            status, name = file_line.split("\t")
+            if name =~ @include_matches
+              matching_files << name.strip
+              matching_lines << file_line.strip
             end
           end
           
-          @file_names = matching_files.join("\n")
+          @file_names = matching_lines.join("\n")
           
           unless matching_files.empty?
+            @file_diffs = `git diff #{oldrev} #{newrev} -- #{matching_files.join(" ")}`
+            
             archive = `git archive --format=zip #{newrev} #{matching_files.join(" ")}`
             Mailer.deliver_zip_message(
               @to,

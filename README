@@ -11,3 +11,7 @@ Call the script from the post-receive file in the "hooks" directory of the remot
     /path/to/git_notifier.rb /path/to/git_notifier_config.yml
 
 The script has a single required parameter, which is a YAML configuration file. See git_notifier_config.yml.sample for an example.
+
+REQUIREMENTS
+============
+The action_mailer gem is required for the script to work.
