@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'action_mailer'
 
-class CsvNotifier
+class GitNotifier
   # Return the name of the current Git repository.
   def repo_name
     git_prefix = `git config hooks.emailprefix`.strip
@@ -45,6 +45,11 @@ class CsvNotifier
     else
       @include_branches = []
     end
+    if @config["include_matches"] and !@config["include_matches"].empty?
+      @include_matches = Regexp.new(@config["include_matches"])
+    else
+      @include_matches = Regexp.new(".*")
+    end
     
     STDIN.each_line do |line|
       oldrev, newrev, ref = line.strip.split
@@ -68,30 +73,30 @@ class CsvNotifier
 
           files = `git diff --diff-filter=ACM --name-only #{oldrev} #{newrev}`.strip
 
-          csvs = []
+          matching_files = []
           files.each do |filename|
-            if filename =~ %r/csv$/
-              csvs << filename.strip
+            if filename =~ @include_matches
+              matching_files << filename.strip
             end
           end
           
-          @file_names = csvs.join("\n")
+          @file_names = matching_files.join("\n")
           
-          unless csvs.empty?
-            archive = `git archive --format=zip #{newrev} #{csvs.join(" ")}`
+          unless matching_files.empty?
+            archive = `git archive --format=zip #{newrev} #{matching_files.join(" ")}`
             Mailer.deliver_zip_message(
               @to,
               @from,
               expand_placeholders(tmp_subject),
               archive,
               expand_placeholders(tmp_body),
-              "csv_#{repo_name}_#{@branch_name}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip"
+              "file_#{repo_name}_#{@branch_name}_#{Time.now.strftime("%Y-%m-%d_%H-%M")}.zip"
             )
-            puts "Sent CSV notification email"
+            puts "Sent notification email"
           end
         end
       rescue Exception => e
-        puts "Exception in CSV notifier hook: #{e}"
+        puts "Exception in notifier hook: #{e}"
         puts "Hook params: #{oldrev} #{newrev} #{ref}"
       end
     end
@@ -114,6 +119,6 @@ class Mailer < ActionMailer::Base
 end
 
 if __FILE__ == $0
-  n = CsvNotifier.new
+  n = GitNotifier.new
   n.main(ARGV)
 end

@@ -12,6 +12,10 @@ include_branches: ""
 # This option takes precedence on include_branches
 exclude_branches: ""
 
+# Regexp monitored files have to match to be included in the mail
+# e.g. include_matches: "csv$" for csv files
+include_matches: ""
+
 # Placeholders REPO_NAME and BRANCH_NAME will be substituted with the names of
 # the repository and the branch respectively.
 # FILE_NAMES will be substituted with the list of files included in the
