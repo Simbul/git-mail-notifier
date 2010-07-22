@@ -40,6 +40,11 @@ class CsvNotifier
     else
       @exclude_branches = []
     end
+    if @config["include_branches"]
+      @include_branches = @config["include_branches"].split
+    else
+      @include_branches = []
+    end
     
     STDIN.each_line do |line|
       oldrev, newrev, ref = line.strip.split
@@ -48,7 +53,8 @@ class CsvNotifier
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
           @branch_name = ref.sub('refs/heads/', '')
           
-          return if @exclude_branches.include? @branch_name
+          next if @exclude_branches.include? @branch_name
+          next if !@include_branches.empty? and !@include_branches.include? @branch_name
           
           tmp_body = @config["body"]
           tmp_subject = @config["subject"]

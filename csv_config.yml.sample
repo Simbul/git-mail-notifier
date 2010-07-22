@@ -4,7 +4,12 @@ recipients: "someaddress@someexampledomain.com"
 # Sender email address (optional)
 from: "no-reply@someexampledomain.com"
 
+# Space-separated list of branches to monitor for changes
+# If empty, all branches are monitored
+include_branches: ""
+
 # Space-separated list of branches to ignore
+# This option takes precedence on include_branches
 exclude_branches: ""
 
 # Placeholders REPO_NAME and BRANCH_NAME will be substituted with the names of
