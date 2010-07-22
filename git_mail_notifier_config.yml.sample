@@ -1,8 +1,8 @@
 # Comma-separated list of recipient email addresses
-recipients: "someaddress@someexampledomain.com"
+recipients: ""
 
-# Sender email address (optional)
-from: "no-reply@someexampledomain.com"
+# Sender email address (optional, defaults to no-reply@nodomain.com)
+from: ""
 
 # Space-separated list of branches to monitor for changes
 # If empty, all branches are monitored

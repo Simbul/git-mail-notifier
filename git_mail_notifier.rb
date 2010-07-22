@@ -37,8 +37,16 @@ class GitMailNotifier
     
     @config = YAML::load_file(config_path)
     @to = @config["recipients"]
-    @from = @config["from"] || "no-reply@nodomain.com"
+    if @to.nil? or @to.empty?
+      puts "No recipients specified in #{config_path}"
+      return
+    end
     
+    if @config["from"] and !@config["from"].empty?
+      @from = @config["from"]
+    else
+      @from = "no-reply@nodomain.com"
+    end
     if @config["exclude_branches"]
       @exclude_branches = @config["exclude_branches"].split
     else
