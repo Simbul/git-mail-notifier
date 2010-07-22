@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'action_mailer'
 
-class GitNotifier
+class GitMailNotifier
   # Return the name of the current Git repository.
   def repo_name
     git_prefix = `git config hooks.emailprefix`.strip
@@ -107,7 +107,7 @@ class GitNotifier
           end
         end
       rescue Exception => e
-        puts "Exception in notifier hook: #{e}"
+        puts "Exception in GitMailNotifier: #{e}"
         puts "Hook params: #{oldrev} #{newrev} #{ref}"
       end
     end
@@ -130,6 +130,6 @@ class Mailer < ActionMailer::Base
 end
 
 if __FILE__ == $0
-  n = GitNotifier.new
+  n = GitMailNotifier.new
   n.main(ARGV)
 end

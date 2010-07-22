@@ -1,6 +1,6 @@
-GIT NOTIFIER
+GIT MAIL NOTIFIER
 
-This script is meant to be called from a Git hook such as post-receive.
+This Ruby script is meant to be called from a Git hook such as post-receive.
 It will identify all the files matching a pattern which have been modified in any given pushed commit, it will compress them into a zip archive and it will send them by email to the specified recipients.
 
 USAGE
@@ -8,10 +8,11 @@ USAGE
 Call the script from the post-receive file in the "hooks" directory of the remote Git repository.
 
     #!/bin/sh
-    /path/to/git_notifier.rb /path/to/git_notifier_config.yml
+    /path/to/git_mail_notifier.rb /path/to/git_mail_notifier_config.yml
 
-The script has a single required parameter, which is a YAML configuration file. See git_notifier_config.yml.sample for an example.
+The script has a single required parameter, which is a YAML configuration file. See git_mail_notifier_config.yml.sample for an example.
 
 REQUIREMENTS
 ============
+The script is written in Ruby: a Ruby interpreter is required for it to work.
 The action_mailer gem is required for the script to work.
