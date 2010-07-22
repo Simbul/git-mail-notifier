@@ -35,6 +35,11 @@ class CsvNotifier
     @to = @config["recipients"]
     @from = @config["from"] || "no-reply@nodomain.com"
     @branch_name = ""
+    if @config["exclude_branches"]
+      @exclude_branches = @config["exclude_branches"].split
+    else
+      @exclude_branches = []
+    end
     
     STDIN.each_line do |line|
       oldrev, newrev, ref = line.strip.split
@@ -42,6 +47,9 @@ class CsvNotifier
       begin
         if ref =~ %r"^refs/heads" and newrev != "0000000000000000000000000000000000000000"
           @branch_name = ref.sub('refs/heads/', '')
+          
+          return if @exclude_branches.include? @branch_name
+          
           tmp_body = @config["body"]
           tmp_subject = @config["subject"]
 

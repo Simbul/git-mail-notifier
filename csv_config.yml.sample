@@ -4,6 +4,9 @@ recipients: "someaddress@someexampledomain.com"
 # Sender email address (optional)
 from: "no-reply@someexampledomain.com"
 
+# Space-separated list of branches to ignore
+exclude_branches: ""
+
 # Placeholders REPO_NAME and BRANCH_NAME will be substituted with the names of
 # the repository and the branch respectively.
 # FILE_NAMES will be substituted with the list of files included in the
